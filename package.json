@@ -9,7 +9,7 @@
   "author": "",
   "license": "Beerware",
   "dependencies": {
-    "mongodb": "^6.1.0",
+    "mongodb": "^6.2.0",
     "nodemon": "^3.0.1"
   }
 }

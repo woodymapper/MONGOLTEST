@@ -1,49 +1,50 @@
+// Importuj wymagane moduły
 const mongoString = "mongodb+srv://woodymapper:chuj2@cluster0.qlfwipq.mongodb.net/?retryWrites=true&w=majority";
-const { MongoClient } = require('mongodb');//sterownik o nazwie MongoClient
+const { MongoClient } = require('mongodb');
+const dbName = 'sample_airbnb';
+const collectionName = 'listingsAndReviews';
 
+// Główna funkcja programu
+async function main() {
+    const client = new MongoClient(mongoString);
 
-
-
-async function main(){
-    //stworzenie połączenia z bazą
-const client = new MongoClient(mongoString); 
-    try{
-        //spróbuj nawiązać poł
+    try {
         await client.connect();
-        //uruchamianie funkci pokazującą baze danyuch - atrybut przekazania do bazy danych
-       await listDB(client);
-    }catch(error){
-
-        //jak się rozjebie
-            console.error(error);
+        await listDB(client);
+    } catch (error) {
+        console.error(error);
     } finally {
-
-        //obojętnie
+        // Always close the client, even in case of errors
         await client.close();
     }
-
-    
-
-    
-
-
 }
 
-async function listDB(client){
+// Funkcja do listowania dokumentów w kolekcji
+async function listDB(client) {
+    // Uzyskanie dostępu do bazy danych i kolekcji
+    const db = client.db(dbName);
+    const collection = db.collection(collectionName);
 
-   //zmienna z listą 
-let databaseList = await client.db().admin().listDatabases();
+    // Wyszukiwanie dokumentów, które mają pole "bedrooms" równe 1
+    collection.find({ bedrooms: { $lt: 1 } }).project({ _id: 1, name: 1 }).toArray((err, documents) => {
+        if (err) {
+            console.error('Błąd podczas odczytu dokumentów:', err); // Obsługa błędów
+            
+            
+            return;
+        }
 
-//console.log(databaseList);
-
-databaseList.databases.forEach(database =>{
-
-    console.log("Nazwa: " + database.name + " Rozmiar: " + database.sizeOnDisk);
-});
-
+        // Iteracja przez odczytane dokumenty i wyświetlenie wybranych pól
+        documents.forEach((document) => {
+            console.log(`_id: ${document._id}, name: ${document.name}`);
+        });
+    });
 }
+
 
 main();
+
+
 
 /*
 
