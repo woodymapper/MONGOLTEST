@@ -26,7 +26,7 @@ async function listDB(client) {
     const collection = db.collection(collectionName);
 
     // Wyszukiwanie dokumentów, które mają pole "bedrooms" równe 1
-    collection.find({ bedrooms: { $lt: 1 } }).project({ _id: 1, name: 1 }).toArray((err, documents) => {
+    collection.find({ bedrooms: { $gt: 1 } }).project({ _id: 1, name: 1 }).toArray((err, documents) => {
         if (err) {
             console.error('Błąd podczas odczytu dokumentów:', err); // Obsługa błędów
             
