@@ -1,51 +1,39 @@
-// Importuj wymagane moduły
-const mongoString = "mongodb+srv://woodymapper:chuj2@cluster0.qlfwipq.mongodb.net/?retryWrites=true&w=majority";
-const { MongoClient } = require('mongodb');
-const dbName = 'sample_airbnb';
-const collectionName = 'listingsAndReviews';
 
-// Główna funkcja programu
-async function main() {
-    const client = new MongoClient(mongoString);
+//const mongoString = "mongodb+srv://woodymapper:chuj2@cluster0.qlfwipq.mongodb.net/?retryWrites=true&w=majority";
+//const { MongoClient } = require('mongodb');
 
-    try {
-        await client.connect();
-        await listDB(client);
-    } catch (error) {
-        console.error(error);
-    } finally {
-        // Always close the client, even in case of errors
-        await client.close();
-    }
-}
 
-// Funkcja do listowania dokumentów w kolekcji
-async function listDB(client) {
-    // Uzyskanie dostępu do bazy danych i kolekcji
-    const db = client.db(dbName);
-    const collection = db.collection(collectionName);
+const express = require('express');  const app = express();
 
-    // Wyszukiwanie dokumentów, które mają pole "bedrooms" równe 1
-    collection.find({ bedrooms: { $gt: 1 } }).project({ _id: 1, name: 1 }).toArray((err, documents) => {
-        if (err) {
-            console.error('Błąd podczas odczytu dokumentów:', err); // Obsługa błędów
-            
-            
-            return;
-        }
+const db = require('./db');
 
-        // Iteracja przez odczytane dokumenty i wyświetlenie wybranych pól
-        documents.forEach((document) => {
-            console.log(`_id: ${document._id}, name: ${document.name}`);
-        });
+app.get('/', async (req, res) => {
+    res.send("chuj");
+})
+
+
+app.get('/list', async (req, res) => {
+    res.write("<style>");
+    res.write("table{border-style: dashed;}");
+
+    res.write("</style>");
+    res.write("<h1>Rekordy</h1>");
+    const client = await db.connect();
+    res.write("<table>");
+    let list = await db.getAllListings(client);
+    list.forEach(element => {
+        res.write("<tr>");
+        res.write("<td>" + element.listing_url + "</td>");
+        res.write("<td>" + element.name + "</td>");
+        res.write("</tr>");
     });
-}
+    res.write("</table>");
+    db.close(client);
+    res.end();
+})
 
 
-main();
-
-
-
+app.listen(8000);
 /*
 
 
