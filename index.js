@@ -3,7 +3,14 @@
 //const { MongoClient } = require('mongodb');
 
 
-const express = require('express');  const app = express();
+const express = require('express'); 
+
+const BodyParse = require('body-parser');
+
+
+const app = express();
+
+app.use(BodyParse.urlencoded({extended: true}));
 
 const db = require('./db');
 
@@ -32,6 +39,45 @@ app.get('/list', async (req, res) => {
     res.end();
 })
 
+app.post('/search', async (req,res)=> {
+
+
+let criteria = req.body;
+
+const client = await db.connect();
+let list = await db.get(client, criteria);
+
+res.write("<h1>Rekordy</h1>");
+res.write("<table>");
+list.forEach(element => {
+    res.write("<tr>");
+    res.write("<td>" + element.listing_url + "</td>");
+    res.write("<td>" + element.name + "</td>");
+    res.write("</tr>");
+});
+res.write("</table>");
+db.close(client);
+res.end();
+
+
+
+});
+
+app.post('/add',async (req,res)=>{
+let data = req.body;
+const client = await db.connect();
+const dbResponse = await db.add(client,data);
+if(dbResponse ){
+
+res.write("<h1>dodano</h1>")
+
+}
+else{
+    res.write("<h1>błąd</h1>")
+ 
+}
+db.close(client);   res.end()
+});
 
 app.listen(8000);
 /*
